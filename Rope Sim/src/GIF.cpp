@@ -45,7 +45,8 @@ void GIF::SaveGIF(const std::string& filename)
 	if (result.data)
 	{
 		std::string dir = saveDirectory + filename + ".gif";
-		FILE* fp = fopen(dir.c_str(), "wb");
+		FILE* fp;
+		fopen_s(&fp, dir.c_str(), "wb");
 		if (fp == nullptr)
 		{
 			std::string err = "Error opening '" + dir + "'";

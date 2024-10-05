@@ -8,17 +8,26 @@ Rope::Rope(int size, double thickness)
 		head = nullptr;
 		return;
 	}
-
-	head = new Node();
-	head->radius = thickness / 2.f;
+	
+	head = (Node*)malloc(sizeof(Node) * size);
+	if (head == nullptr)
+		return;
 
 	Node* current = head;
-	for (int i = 1; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
-		current->next = new Node();
-		current->next->radius = head->radius;
-		current = current->next;
+		new (current) Node(Vec2(0.f, 0.f), thickness / 2.f);
+		if (i + 1 < size)
+		{
+			current->next = current + 1;
+			current = current->next;
+		}
+		else
+		{
+			current->next = nullptr;
+		}
 	}
+	current = nullptr;
 }
 void Rope::Update(float dT, const Vec2& follow)
 {
@@ -93,7 +102,7 @@ int Rope::count()
 	while (current->next != nullptr)
 	{
 		current = current->next;
-		++len;
+		len++;
 	}
 
 	return len;

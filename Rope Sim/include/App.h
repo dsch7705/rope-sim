@@ -4,6 +4,7 @@
 #include <string>
 #include <thread>
 #include "raylib/raylib.h"
+#include "Serial.h"
 #include "GIF.h"
 #include "Rope.h"
 
@@ -18,6 +19,9 @@ public:
 	void RecordGIF();
 
 private:
+	Rope* rope;
+
+	// GIF
 	GIF* gifHandle;
 	bool recordingGIF = false;
 	float GIFStartTime = 0.f;
@@ -25,6 +29,7 @@ private:
 	float timeSinceLastFrameMS = 0.f;
 	float GIFMSPerFrame = 50.f;
 
+	// Core
 	void Update();
 	void Draw();
 

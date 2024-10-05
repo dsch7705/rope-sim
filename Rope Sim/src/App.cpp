@@ -8,18 +8,25 @@ App::App(int w, int h, const char* title)
 	center.y = h / 2.f;
 }
 
-Rope rope(50, 20.f);
 void App::Start()
 {
-	int numPins = 10;
-	double pinCircleRadius = 100.f;
-	double pinRadius = 12.5f;
+	rope = new Rope(10, 20.f);
+
+	int numPins = 0;
+	double pinCircleRadius = 275.f;
+	double pinRadius = 15.f;
 	for (int i = 0; i < numPins; i++)
 	{
 		double theta = ((2.f * PI) / numPins) * i;
 		Pin* p = new Pin(center.x + cos(theta) * pinCircleRadius, center.y + sin(theta) * pinCircleRadius, pinRadius);
-		rope.pins.push_back(p);
+		rope->pins.push_back(p);
+		p = new Pin(center.x + cos(theta) * pinCircleRadius*.5f, center.y + sin(theta) * pinCircleRadius*.5f, pinRadius - 10);
+		rope->pins.push_back(p);
 	}
+
+	Serial::PINSData data(rope->pins, BLACK);
+	//Serial::SerializePINS(data, "res/save/", "double_circle");
+	Serial::LoadFile("res/save/double_circle.pins", rope);
 
 	while (!WindowShouldClose())
 	{
@@ -29,7 +36,6 @@ void App::Start()
 void App::RecordGIF()
 {
 	gifHandle = new GIF(GetScreenWidth(), GetScreenHeight(), GIFMSPerFrame / 10);
-
 	GIFStartTime = GetTime();
 	timeSinceLastFrameMS = 0.f;
 	recordingGIF = true;
@@ -42,7 +48,7 @@ void App::GetFileName(std::string& filename)
 
 void App::Update()
 {
-	rope.Update(GetFrameTime(), Vec2(GetMouseX(), GetMouseY()));
+	rope->Update(GetFrameTime(), Vec2(GetMouseX(), GetMouseY()));
 	Draw();
 
 	// Input
@@ -58,7 +64,6 @@ void App::Update()
 		if (timeSinceLastFrameMS / 10 > gifHandle->frameTimeCS)
 		{
 			uint8_t* img = (uint8_t*)LoadImageFromScreen().data;
-			//std::thread frame(&GIF::RecordFrame, std::ref(gifHandle), std::ref(img));
 			gifHandle->RecordFrame(img);
 			timeSinceLastFrameMS = 0.f;
 		}
@@ -85,14 +90,14 @@ void App::Draw()
 	ClearBackground(BLACK);
 
 	// Rope
-	Node* current = rope.head;
+	Node* current = rope->head;
 	while (current != nullptr)
 	{
 		DrawCircle(current->pos.x, current->pos.y, current->radius, WHITE);
 		current = current->next;
 	}
 	// Pins
-	for (const Pin* pin : rope.pins)
+	for (const Pin* pin : rope->pins)
 	{
 		DrawCircle(pin->pos.x, pin->pos.y, pin->radius, LIGHTGRAY);
 	}

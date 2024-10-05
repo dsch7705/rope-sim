@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Vec2.h"
+#include "raylib/raylib.h"
 
 
 struct Pin
