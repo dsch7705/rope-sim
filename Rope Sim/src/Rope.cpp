@@ -31,7 +31,7 @@ void Rope::Update(float dT, const Vec2& follow)
 			current->pos = current->pos.lerp(follow, dT * 10.f);
 		}
 		if (current->next != nullptr)
-			current->next->pos = current->next->pos.lerp(current->pos - (current->pos - current->next->pos).norm() * 2.f * current->radius, dT * 100.f);
+			current->next->pos = current->next->pos.lerp(current->pos - (current->pos - current->next->pos).norm() * 2.f * current->radius, 1.f);
 		// Resolve collision with pins
 		for (const Pin* pin : pins)
 		{

@@ -1,4 +1,7 @@
 #include <iostream>
+
+//#define MSF_GIF_IMPL
+//#include "raylib/msf_gif.h"
 #include "App.h"
 
 int main()
