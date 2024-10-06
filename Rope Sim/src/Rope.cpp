@@ -116,24 +116,28 @@ void Rope::Collisions()
 	for (const Shape* shape : shapes)
 	{
 		// Test each edge
-		for (int i = 0; i < 1;i++)//shape->sides; i++)
+		for (int i = 0; i < shape->sides; i++)
 		{
 			int nextI = (i + 1) % shape->sides;
-			Vec2 currentV = shape->vertices[i];
-			Vec2 nextV = shape->vertices[nextI];
+			Vec2 currentV = shape->center + shape->vertices[i];
+			Vec2 nextV = shape->center + shape->vertices[nextI];
 			edge = nextV - currentV;	// points from first point to second, etc.
-			DrawLine(0, 0, edge.x, edge.y, SKYBLUE);
 			
 			// Test against each node
 			Node* current = head;
 			while (current != nullptr)
 			{
-				Vec2 nodeRel = current->pos - (shape->center + currentV);
-				double dp = (nodeRel.norm().dot(edge.norm()) + 1) / 2;
-				//std::cout << dp << '\n';
-				Vec2 closestP = (shape->center + currentV) + (edge * dp);
+				Vec2 nodeRel = current->pos - currentV;
+				double dp = nodeRel.dot(edge) / pow(edge.mag(), 2);
+				dp = fmax(0, fmin(1, dp));
+				
+				Vec2 closestP = currentV + (edge * dp);
 				if (current == head)
-					DrawCircle(closestP.x, closestP.y, 10, RED);
+				{
+					//DrawCircle(closestP.x, closestP.y, 10, RED);
+					//DrawLine(currentV.x, currentV.y, (currentV + nodeRel).x, (currentV + nodeRel).y, BLUE);
+					//DrawLine(currentV.x, currentV.y, (currentV + edge).x, (currentV + edge).y, BLUE);
+				}
 
 				// Collision?
 				if (Vec2::dist(current->pos, closestP) < current->radius)

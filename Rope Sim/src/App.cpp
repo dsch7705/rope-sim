@@ -11,7 +11,7 @@ App::App(int w, int h, const char* title)
 Shape star = Shape::Star(100.f, Vec2());
 void App::Start()
 {
-	rope = new Rope(1, 20.f);
+	rope = new Rope(75, 20.f);
 	rope->shapes.push_back(&star);
 
 	int numPins = 0;// 25;
