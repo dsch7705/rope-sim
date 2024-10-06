@@ -2,7 +2,7 @@
 #include <iostream>
 #include <array>
 #include <string>
-#include <thread>
+#include <chrono>
 #include "raylib/raylib.h"
 #include "Serial.h"
 #include "GIF.h"
@@ -32,6 +32,7 @@ private:
 	// Core
 	void Update();
 	void Draw();
+	void DrawShape(Shape& shape);
 
 	static void GetFileName(std::string& filename);
 };

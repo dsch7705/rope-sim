@@ -138,6 +138,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Rope.cpp" />
     <ClCompile Include="src\Serial.cpp" />
+    <ClCompile Include="src\Shape.cpp" />
     <ClCompile Include="src\Vec2.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -149,6 +150,7 @@
     <ClInclude Include="include\raylib\rlgl.h" />
     <ClInclude Include="include\Rope.h" />
     <ClInclude Include="include\Serial.h" />
+    <ClInclude Include="include\Shape.h" />
     <ClInclude Include="include\Vec2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Vec2.h"
+#include "Shape.h"
 #include "raylib/raylib.h"
 
 
@@ -26,6 +27,7 @@ class Rope
 {
 public:
 	std::vector<Pin*> pins;
+	std::vector<Shape*> shapes;
 
 public:
 	Node* head;
@@ -35,4 +37,7 @@ public:
 	void extend(int n);
 	void shrink(int n);
 	int count();
+
+private:
+	void Collisions();
 };

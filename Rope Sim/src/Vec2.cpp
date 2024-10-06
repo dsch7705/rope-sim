@@ -1,9 +1,9 @@
 #include "Vec2.h"
 
 
-Vec2 Vec2::dot(const Vec2& v1)
+double Vec2::dot(const Vec2& v1)
 {
-	return Vec2(x * v1.x, y * v1.y);
+	return x * v1.x + y * v1.y;
 }
 double Vec2::mag()
 {

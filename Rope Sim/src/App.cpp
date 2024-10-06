@@ -8,11 +8,13 @@ App::App(int w, int h, const char* title)
 	center.y = h / 2.f;
 }
 
+Shape star = Shape::Star(100.f, Vec2());
 void App::Start()
 {
-	rope = new Rope(10, 20.f);
+	rope = new Rope(1, 20.f);
+	rope->shapes.push_back(&star);
 
-	int numPins = 0;
+	int numPins = 0;// 25;
 	double pinCircleRadius = 275.f;
 	double pinRadius = 15.f;
 	for (int i = 0; i < numPins; i++)
@@ -24,9 +26,10 @@ void App::Start()
 		rope->pins.push_back(p);
 	}
 
-	Serial::PINSData data(rope->pins, BLACK);
-	//Serial::SerializePINS(data, "res/save/", "double_circle");
-	Serial::LoadFile("res/save/double_circle.pins", rope);
+	Serial::PINSData data(rope->pins);
+	//Serial::SerializePINS(data, "res/save/", "modernIO");
+	size_t loadT = Serial::LoadFile("res/save/modernIO.pins", rope);
+	std::cout << "File took " << loadT << " microseconds to load.\n";
 
 	while (!WindowShouldClose())
 	{
@@ -48,6 +51,7 @@ void App::GetFileName(std::string& filename)
 
 void App::Update()
 {
+	star.center = Vec2(GetScreenWidth() / 2, GetScreenHeight() / 2);
 	rope->Update(GetFrameTime(), Vec2(GetMouseX(), GetMouseY()));
 	Draw();
 
@@ -88,7 +92,6 @@ void App::Draw()
 
 	// Draw
 	ClearBackground(BLACK);
-
 	// Rope
 	Node* current = rope->head;
 	while (current != nullptr)
@@ -101,6 +104,24 @@ void App::Draw()
 	{
 		DrawCircle(pin->pos.x, pin->pos.y, pin->radius, LIGHTGRAY);
 	}
+	// Shapes
+	DrawShape(star);
 
 	EndDrawing();
+}
+void App::DrawShape(Shape& shape)
+{
+	Vec2 current, next;
+	for (int i = 0; i < shape.sides; i++)
+	{
+		int nextI = (i + 1) % shape.sides;
+		current = shape.vertices[i];
+		next = shape.vertices[nextI];
+		int x1 = (shape.center + current).x;
+		int y1 = (shape.center + current).y;
+		int x2 = (shape.center + next).x;
+		int y2 = (shape.center + next).y;
+
+		DrawLine(x1, y1, x2, y2, YELLOW);
+	}
 }

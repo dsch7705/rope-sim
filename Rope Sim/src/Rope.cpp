@@ -49,6 +49,7 @@ void Rope::Update(float dT, const Vec2& follow)
 				current->pos = pin->pos + (current->pos - pin->pos).norm() * (current->radius + pin->radius);
 			}
 		}
+		Collisions();
 
 		current = current->next;
 	}
@@ -106,4 +107,43 @@ int Rope::count()
 	}
 
 	return len;
+}
+
+void Rope::Collisions()
+{
+	// Shapes
+	Vec2 edge;
+	for (const Shape* shape : shapes)
+	{
+		// Test each edge
+		for (int i = 0; i < 1;i++)//shape->sides; i++)
+		{
+			int nextI = (i + 1) % shape->sides;
+			Vec2 currentV = shape->vertices[i];
+			Vec2 nextV = shape->vertices[nextI];
+			edge = nextV - currentV;	// points from first point to second, etc.
+			DrawLine(0, 0, edge.x, edge.y, SKYBLUE);
+			
+			// Test against each node
+			Node* current = head;
+			while (current != nullptr)
+			{
+				Vec2 nodeRel = current->pos - (shape->center + currentV);
+				double dp = (nodeRel.norm().dot(edge.norm()) + 1) / 2;
+				//std::cout << dp << '\n';
+				Vec2 closestP = (shape->center + currentV) + (edge * dp);
+				if (current == head)
+					DrawCircle(closestP.x, closestP.y, 10, RED);
+
+				// Collision?
+				if (Vec2::dist(current->pos, closestP) < current->radius)
+				{
+					// Resolve
+					current->pos = closestP + (current->pos - closestP).norm() * current->radius;
+				}
+
+				current = current->next;
+			}
+		}
+	}
 }

@@ -27,10 +27,11 @@ struct Vec2
 	Vec2 operator-() { return Vec2(-x, -y); }
 	bool operator==(const Vec2& v1) { return (x == v1.x && y == v1.y); }
 
-	Vec2 dot(const Vec2& v1);
+	double dot(const Vec2& v1);
 	double mag();
 	Vec2 norm();
 	Vec2 lerp(const Vec2& v1, float t);
+	Vec2 perp() { return Vec2(y, -x); }
 
 	static Vec2 lerp(const Vec2& v0, const Vec2& v1, float t);
 	static double dist(const Vec2& v0, const Vec2& v1);
