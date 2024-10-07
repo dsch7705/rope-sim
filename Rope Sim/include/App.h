@@ -32,7 +32,7 @@ private:
 	// Core
 	void Update();
 	void Draw();
-	void DrawShape(Shape& shape);
+	void DrawShape(const Shape& shape);
 
 	static void GetFileName(std::string& filename);
 };

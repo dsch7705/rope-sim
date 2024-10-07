@@ -7,14 +7,15 @@
 
 namespace Serial
 {
-	struct PINSData
+	struct LEVELData
 	{
 		const std::vector<Pin*>& pins;
+		const std::vector<Shape*>& shapes;
 
-		PINSData(const std::vector<Pin*>& pins) : pins(pins) {}
+		LEVELData(const std::vector<Pin*>& pins, const std::vector<Shape*>& shapes) : pins(pins), shapes(shapes) {}
 	};
 
-	void SerializePINS(PINSData& data, const std::string& directory, const std::string& filename);
+	void SerializeLEVEL(LEVELData& data, const std::string& directory, const std::string& filename);
 	size_t LoadFile(const std::string& location, void* dest);
 
 	bool charCmp(char* data, size_t len, const char* lit);;

@@ -8,27 +8,31 @@ App::App(int w, int h, const char* title)
 	center.y = h / 2.f;
 }
 
-Shape star = Shape::Star(100.f, Vec2());
+const int N_STARS = 10;
 void App::Start()
 {
+
 	rope = new Rope(75, 20.f);
-	rope->shapes.push_back(&star);
+	for (int i = 0; i < 0; i++)
+	{
+		double theta = (PI * 2. / N_STARS) * i;
+		Shape* s = new Shape(Shape::Star(25.f, center + Vec2(cos(theta), sin(theta)) * 175.f));
+		rope->shapes.push_back(s);
+	}
 
 	int numPins = 0;// 25;
-	double pinCircleRadius = 275.f;
-	double pinRadius = 15.f;
+	double pinCircleRadius = 250.;
+	double pinRadius = 15.;
 	for (int i = 0; i < numPins; i++)
 	{
 		double theta = ((2.f * PI) / numPins) * i;
 		Pin* p = new Pin(center.x + cos(theta) * pinCircleRadius, center.y + sin(theta) * pinCircleRadius, pinRadius);
 		rope->pins.push_back(p);
-		p = new Pin(center.x + cos(theta) * pinCircleRadius*.5f, center.y + sin(theta) * pinCircleRadius*.5f, pinRadius - 10);
-		rope->pins.push_back(p);
 	}
 
-	Serial::PINSData data(rope->pins);
-	//Serial::SerializePINS(data, "res/save/", "modernIO");
-	size_t loadT = Serial::LoadFile("res/save/modernIO.pins", rope);
+	//Serial::LEVELData level(rope->pins, rope->shapes);
+	//Serial::SerializeLEVEL(level, "res/save/", "leveltest");
+	size_t loadT = Serial::LoadFile("res/save/leveltest.pins", rope);
 	std::cout << "File took " << loadT << " microseconds to load.\n";
 
 	while (!WindowShouldClose())
@@ -51,7 +55,6 @@ void App::GetFileName(std::string& filename)
 
 void App::Update()
 {
-	star.center = Vec2(GetScreenWidth() / 2, GetScreenHeight() / 2);
 	rope->Update(GetFrameTime(), Vec2(GetMouseX(), GetMouseY()));
 	Draw();
 
@@ -62,7 +65,7 @@ void App::Update()
 	// GIF
 	if (recordingGIF)
 	{
-		timeSinceLastFrameMS += (GetTime() - GIFStartTime);
+		timeSinceLastFrameMS += GetFrameTime() * 1000;
 
 		// Record frame
 		if (timeSinceLastFrameMS / 10 > gifHandle->frameTimeCS)
@@ -105,11 +108,14 @@ void App::Draw()
 		DrawCircle(pin->pos.x, pin->pos.y, pin->radius, LIGHTGRAY);
 	}
 	// Shapes
-	DrawShape(star);
+	for (const Shape* shape : rope->shapes)
+	{
+		DrawShape(*shape);
+	}
 
 	EndDrawing();
 }
-void App::DrawShape(Shape& shape)
+void App::DrawShape(const Shape& shape)
 {
 	Vec2 current, next;
 	for (int i = 0; i < shape.sides; i++)

@@ -1,7 +1,7 @@
 #include "Serial.h"
 
 
-void Serial::SerializePINS(PINSData& data, const std::string& directory, const std::string& filename)
+void Serial::SerializeLEVEL(Serial::LEVELData& data, const std::string& directory, const std::string& filename)
 {
 	std::string path = directory + filename + ".pins";
 	std::ofstream file(path, std::ios::binary);
@@ -12,13 +12,41 @@ void Serial::SerializePINS(PINSData& data, const std::string& directory, const s
 		return;
 	}
 
-	file.write("PINS", 4);
+	// File header
+	int headerLen = 5;
+	file.write((char*)&headerLen, sizeof(int));
+	file.write("LEVEL", headerLen);					// type
 	int numPins = data.pins.size();
-	file.write((char*)&numPins, sizeof(int));
+	file.write((char*)&numPins, sizeof(int));		// # pins
+	int numShapes = data.shapes.size();
+	file.write((char*)&numShapes, sizeof(int));		// # shapes
 
+	// Pins
 	for (const Pin* pin : data.pins)
 	{
 		file.write((char*)pin, sizeof(Pin));
+	}
+
+	// Shapes
+	for (const Shape* shape : data.shapes)
+	{
+		int vertBufferSize = sizeof(Vec2) * shape->sides;
+		int fullBufferSize = sizeof(shape->sides) + sizeof(shape->center) + vertBufferSize;
+		char* buffer = (char*)malloc(sizeof(shape->sides) + sizeof(shape->center) + vertBufferSize);
+		if (buffer == nullptr)
+			continue;
+
+		char* ptr = buffer;
+		memcpy(ptr, &shape->sides, sizeof(shape->sides));		// # sides
+		ptr += sizeof(shape->sides);
+		memcpy(ptr, &shape->center, sizeof(shape->center));		// center
+		ptr += sizeof(shape->center);
+		memcpy(ptr, shape->vertices, vertBufferSize);			// vertices
+
+		file.write(buffer, fullBufferSize);
+
+		free(buffer);
+		ptr = nullptr;
 	}
 
 	file.close();
@@ -35,34 +63,54 @@ size_t Serial::LoadFile(const std::string& location, void* dest)
 	{
 		std::string msg = "Cannot open file '" + location + "'";
 		perror(msg.c_str());
-		return 0;
+		return -1;
 	}
 
-	// Read first 4 identifying bytes
-	char type[4];
-	file.read(type, 4);
+	// Header
+	int headerLen;
+	file.read((char*)&headerLen, sizeof(int));
+	char* type = new char[5];
+	file.read(type, headerLen);							// type
 
-	if (!charCmp(type, 4, "PINS"))
+	if (charCmp(type, 5, "LEVEL"))
 	{
-		std::cout << "File at " << location << " formatted incorrectly.";
-		return 0;
+		// Level handle
+		Rope* level = (Rope*)dest;
+
+		// Read # of objects
+		int nPins, nShapes;
+		file.read((char*)&nPins, sizeof(int));			// # pins
+		file.read((char*)&nShapes, sizeof(int));		// # shapes
+
+		Pin* pinBuf = (Pin*)malloc(sizeof(Pin) * nPins);
+		Shape* shapeBuf = (Shape*)malloc(sizeof(Shape) * nShapes);
+		if (pinBuf == nullptr || shapeBuf == nullptr)
+			return -1;
+
+		// Pins
+		for (int offset = 0; offset < nPins; offset++)
+		{
+			Pin* loc = pinBuf + offset;
+			file.read((char*)loc, sizeof(Pin));
+			level->pins.push_back(loc);
+		}
+
+		// Shapes
+		for (int i = 0; i < nShapes; i++)
+		{
+			Shape* loc = shapeBuf + i;									// Address to write to
+			file.read((char*)&loc->sides, sizeof(loc->sides));			// # sides
+			loc->vertices = (Vec2*)malloc(sizeof(Vec2) * loc->sides);
+			loc->normals = (Vec2*)malloc(sizeof(Vec2) * loc->sides);
+			file.read((char*)&loc->center, sizeof(loc->center));		// center
+			file.read((char*)loc->vertices, sizeof(Vec2) * loc->sides); // vertices
+
+			loc->GenerateNormals(false);
+			level->shapes.push_back(loc);
+		}
 	}
 
-	// Level data file
-	Rope* destRope = (Rope*)dest;
-
-	// Read next byte for # of pins
-	int* nPins = new int;
-	file.read((char*)nPins, sizeof(int));
-	std::cout << *nPins << '\n';
-	Pin* p = (Pin*)malloc(sizeof(Pin) * *nPins);
-	
-	for (int offset = 0; offset < *nPins; offset++)
-	{
-		Pin* loc = p + offset;
-		file.read((char*)loc, sizeof(Pin));
-		destRope->pins.push_back(loc);
-	}
+	delete[] type;
 	file.close();
 
 	// Self timing

@@ -1,7 +1,7 @@
 #include "Shape.h"
 
 
-Shape::Shape(const unsigned int sides, const Vec2& center) : sides(sides), center(center), normals(nullptr)
+Shape::Shape(const unsigned int sides, const Vec2& center) : sides(sides), center(center)
 {
 	vertices = (Vec2*)malloc(sizeof(Vec2) * sides);
 	normals = (Vec2*)malloc(sizeof(Vec2) * sides);
@@ -10,6 +10,18 @@ Shape::~Shape()
 {
 	free(vertices);
 	free(normals);
+}
+void Shape::GenerateNormals(bool invert)
+{
+	for (int i = 0; i < sides; i++)
+	{
+		int nextI = (i + 1) % sides;
+
+		Vec2 edge = vertices[nextI] - vertices[i];
+		if (invert)
+			edge = -edge;
+		normals[i] = edge.perp().norm();
+	}
 }
 
 Shape Shape::Star(float radius, const Vec2& center)
@@ -20,18 +32,20 @@ Shape Shape::Star(float radius, const Vec2& center)
 	for (int i = 0; i < star.sides; i++)
 	{
 		double theta = (-PI / 2.) + i * (4. * PI / star.sides);
-		star.vertices[i] = star.center + Vec2(cos(theta) * radius, sin(theta) * radius);
+		star.vertices[i] = Vec2(cos(theta) * radius, sin(theta) * radius);
 	}
-	CalculateNormals(star);
 
+	star.GenerateNormals(false);
 	return star;
 }
-
-void Shape::CalculateNormals(Shape& shape)
+Shape Shape::Box(const Vec2& size, const Vec2& center)
 {
-	for (int i = 0; i < shape.sides; i++)
-	{
-		int nextI = (i + 1) % shape.sides;
-		shape.normals[i] = (shape.vertices[nextI] - shape.vertices[i]).perp().norm();
-	}
+	Shape box(4, center);
+	box.vertices[0] = box.center + size / 2;
+	box.vertices[1] = box.center + Vec2(size.x / 2, -size.y / 2);
+	box.vertices[2] = box.center - size / 2;
+	box.vertices[3] = box.center - Vec2(size.x / 2, -size.y / 2);
+
+	box.GenerateNormals(true);
+	return box;
 }

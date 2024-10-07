@@ -30,7 +30,10 @@ void GIF::RecordFrame(uint8_t* data)
 void GIF::SaveGIF(const std::string& filename)
 {
 	if (first == nullptr)
+	{
+		std::cerr << "No gif data to save!\n";
 		return;
+	}
 
 	MsfGifState gifState = {};
 	msf_gif_begin(&gifState, w, h);
@@ -45,17 +48,16 @@ void GIF::SaveGIF(const std::string& filename)
 	if (result.data)
 	{
 		std::string dir = saveDirectory + filename + ".gif";
-		FILE* fp;
-		fopen_s(&fp, dir.c_str(), "wb");
-		if (fp == nullptr)
+		std::ofstream file(dir, std::ios::binary);
+		if (!file.is_open())
 		{
 			std::string err = "Error opening '" + dir + "'";
 			perror(err.c_str());
 		}
 		else
 		{
-			fwrite(result.data, result.dataSize, 1, fp);
-			fclose(fp);
+			file.write((char*)result.data, result.dataSize);
+			file.close();
 		}
 	}
 	msf_gif_free(result);

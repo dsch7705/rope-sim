@@ -2,7 +2,7 @@
 #include "Vec2.h"
 
 
-struct Shape
+typedef struct Shape
 {
 	const unsigned int sides;
 	Vec2 center;
@@ -11,7 +11,8 @@ struct Shape
 
 	Shape(const unsigned int sides, const Vec2& center);
 	~Shape();
+	void GenerateNormals(bool invert);
 
 	static Shape Star(float radius, const Vec2& center);
-	static void CalculateNormals(Shape& shape);
+	static Shape Box(const Vec2& size, const Vec2& center);
 };

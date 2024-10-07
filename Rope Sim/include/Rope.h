@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <cmath>
 #include "Vec2.h"
 #include "Shape.h"
 #include "raylib/raylib.h"
@@ -39,5 +40,5 @@ public:
 	int count();
 
 private:
-	void Collisions();
+	void Collisions(Node* node);
 };

@@ -1,4 +1,5 @@
 #include "Rope.h"
+#define SIMULATION_STEPS 3
 
 
 Rope::Rope(int size, double thickness)
@@ -32,25 +33,27 @@ Rope::Rope(int size, double thickness)
 void Rope::Update(float dT, const Vec2& follow)
 {
 	Node* current = head;
+	Vec2 nextPos = current->pos.lerp(follow, dT * 10.f);
 	while (current != nullptr)
 	{
-		// Lerp each node to its parent
-		if (current == head)
+		Vec2 deltaP = (nextPos - current->pos) / SIMULATION_STEPS;
+		for (int i = 0; i < SIMULATION_STEPS; i++)
 		{
-			current->pos = current->pos.lerp(follow, dT * 10.f);
-		}
-		if (current->next != nullptr)
-			current->next->pos = current->next->pos.lerp(current->pos - (current->pos - current->next->pos).norm() * 2.f * current->radius, 1.f);
-		// Resolve collision with pins
-		for (const Pin* pin : pins)
-		{
-			if (Vec2::dist(current->pos, pin->pos) < current->radius + pin->radius)
+			current->pos += deltaP;
+			Collisions(current);
+
+			// Resolve collision with pins
+			for (const Pin* pin : pins)
 			{
-				current->pos = pin->pos + (current->pos - pin->pos).norm() * (current->radius + pin->radius);
+				if (Vec2::dist(current->pos, pin->pos) < current->radius + pin->radius)
+				{
+					current->pos = pin->pos + (current->pos - pin->pos).norm() * (current->radius + pin->radius);
+				}
 			}
 		}
-		Collisions();
 
+		if (current->next != nullptr)
+			nextPos = current->next->pos.lerp(current->pos - (current->pos - current->next->pos).norm() * 2.f * current->radius, 1.f);
 		current = current->next;
 	}
 }
@@ -109,7 +112,7 @@ int Rope::count()
 	return len;
 }
 
-void Rope::Collisions()
+void Rope::Collisions(Node* node)
 {
 	// Shapes
 	Vec2 edge;
@@ -119,35 +122,24 @@ void Rope::Collisions()
 		for (int i = 0; i < shape->sides; i++)
 		{
 			int nextI = (i + 1) % shape->sides;
-			Vec2 currentV = shape->center + shape->vertices[i];
-			Vec2 nextV = shape->center + shape->vertices[nextI];
+			Vec2 currentV = shape->center + shape->vertices[i];						// Absolute
+			Vec2 nextV = shape->center + shape->vertices[nextI];					// Absolute
 			edge = nextV - currentV;	// points from first point to second, etc.
 			
 			// Test against each node
-			Node* current = head;
-			while (current != nullptr)
-			{
-				Vec2 nodeRel = current->pos - currentV;
-				double dp = nodeRel.dot(edge) / pow(edge.mag(), 2);
-				dp = fmax(0, fmin(1, dp));
+			Vec2 nodeRel = node->pos - currentV;								// Relative to currentV
+			double dp = nodeRel.dot(edge) / pow(edge.mag(), 2);
+			dp = fmax(0, fmin(1, dp));
 				
-				Vec2 closestP = currentV + (edge * dp);
-				if (current == head)
-				{
-					//DrawCircle(closestP.x, closestP.y, 10, RED);
-					//DrawLine(currentV.x, currentV.y, (currentV + nodeRel).x, (currentV + nodeRel).y, BLUE);
-					//DrawLine(currentV.x, currentV.y, (currentV + edge).x, (currentV + edge).y, BLUE);
-				}
-
-				// Collision?
-				if (Vec2::dist(current->pos, closestP) < current->radius)
-				{
-					// Resolve
-					current->pos = closestP + (current->pos - closestP).norm() * current->radius;
-				}
-
-				current = current->next;
+			Vec2 closestP = currentV + (edge * dp);
+			//DrawLine(closestP.x, closestP.y, (closestP + shape->normals[i] * 20.).x, (closestP + shape->normals[i] * 20.).y, RED);
+			// Collision?
+			if (Vec2::dist(node->pos, closestP) < node->radius)
+			{
+				// Resolve
+				node->pos = closestP + (node->pos - closestP).norm() * node->radius;
 			}
+
 		}
 	}
 }
