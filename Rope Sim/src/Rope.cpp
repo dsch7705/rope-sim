@@ -1,5 +1,5 @@
 #include "Rope.h"
-#define SIMULATION_STEPS 3
+#define SIMULATION_STEPS 8
 
 
 Rope::Rope(int size, double thickness)

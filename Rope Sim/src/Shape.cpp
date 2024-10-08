@@ -41,10 +41,10 @@ Shape Shape::Star(float radius, const Vec2& center)
 Shape Shape::Box(const Vec2& size, const Vec2& center)
 {
 	Shape box(4, center);
-	box.vertices[0] = box.center + size / 2;
-	box.vertices[1] = box.center + Vec2(size.x / 2, -size.y / 2);
-	box.vertices[2] = box.center - size / 2;
-	box.vertices[3] = box.center - Vec2(size.x / 2, -size.y / 2);
+	box.vertices[0] = size / 2;
+	box.vertices[1] = Vec2(size.x / 2, -size.y / 2);
+	box.vertices[2] = -size / 2;
+	box.vertices[3] = -Vec2(size.x / 2, -size.y / 2);
 
 	box.GenerateNormals(true);
 	return box;

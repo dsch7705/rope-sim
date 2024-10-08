@@ -12,7 +12,7 @@ const int N_STARS = 10;
 void App::Start()
 {
 
-	rope = new Rope(75, 20.f);
+	rope = new Rope(150, 10.f);
 	for (int i = 0; i < 0; i++)
 	{
 		double theta = (PI * 2. / N_STARS) * i;
@@ -29,6 +29,7 @@ void App::Start()
 		Pin* p = new Pin(center.x + cos(theta) * pinCircleRadius, center.y + sin(theta) * pinCircleRadius, pinRadius);
 		rope->pins.push_back(p);
 	}
+	rope->shapes.push_back(new Shape(Shape::Box(Vec2(150., 150), center)));
 
 	//Serial::LEVELData level(rope->pins, rope->shapes);
 	//Serial::SerializeLEVEL(level, "res/save/", "leveltest");
