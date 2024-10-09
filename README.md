@@ -1,4 +1,9 @@
 # Rope Simulation
-### Rope segments are stored as nodes in a linked list. Each segment `lerps` to its parent. Currently only supports circle-circle collision response. More shapes soon.
-![](Rope%20Sim/res/gifs/circlestar.gif)
+## Features
+- Collision response with convex and concave polygons
+- 2D vector functions
+- Serial-/deserialization
+  - Level data
+  - GIF export
+  - ![](Rope%20Sim/res/gifs/circlestar.gif)
 ## [raylib](https://github.com/raysan5/raylib) for backend and graphics.
